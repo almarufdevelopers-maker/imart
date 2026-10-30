@@ -11,9 +11,10 @@ const GREEN = "#0f3226";
 const GREEN2 = "#1c4a3a";
 const GREEN3 = "#2a6650";
 const GOLD = "#f5d90a";
+const DARK_BG = "#06120e"; 
 const PAPER = "#fbfaf6";
 const INK = "#2a3b33";
-const MUTED = "#556b60";
+const MUTED = "#556b60"; 
 
 const features = [
   ["📖", "Read the Quran in 10 languages", "English, French, Spanish, Indonesian, Turkish, Urdu, Bengali, Chinese, Russian and Swedish. Switch with one tap."],
@@ -51,7 +52,6 @@ const audience = [
   "Daily readers building a habit",
 ];
 
-// Keep these identical to the FAQPage JSON-LD in index.html
 const faqs = [
   ["What is MyQuran App?", "MyQuran App is a free Quran app for Android with translation in 10 languages, verse-by-verse audio by 16 reciters, offline Tafsir Ibn Kathir, bookmarks, reflections and a daily reading streak."],
   ["Is MyQuran App free? Are there ads?", "MyQuran App is free to download and use, with no ads and no subscriptions. Optional in-app purchases are available if you want to support the developers."],
@@ -82,18 +82,18 @@ const css = `
 .mq-row{display:none}
 /* Mobile: overlapping fan of three phones, all visible at once */
 .mq-fan{display:flex;justify-content:center;align-items:center;padding:8px 0 4px;overflow:hidden}
-.mq-ph{flex:none;background:#0a1a14;border:2px solid ${GREEN};padding:5px;border-radius:26px;box-shadow:0 18px 38px rgba(15,50,38,.28)}
+.mq-ph{flex:none;background:#0a1a14;border:2px solid ${GREEN3};padding:5px;border-radius:26px;box-shadow:0 18px 38px rgba(0,0,0,.28)}
 .mq-ph img{display:block;width:100%;height:auto;border-radius:21px}
 .mq-ph.side{width:min(30vw,150px);margin:0 calc(-1 * min(7vw,36px));position:relative;z-index:1}
 .mq-ph.side.l{transform:translateY(22px) rotate(-7deg)}
 .mq-ph.side.r{transform:translateY(22px) rotate(7deg)}
-.mq-ph.mid{width:min(42vw,210px);position:relative;z-index:2;border-radius:30px;border-color:${GOLD};box-shadow:0 26px 50px rgba(15,50,38,.38)}
+.mq-ph.mid{width:min(42vw,210px);position:relative;z-index:2;border-radius:30px;border-color:${GOLD};box-shadow:0 26px 50px rgba(0,0,0,.38)}
 .mq-ph.mid img{border-radius:25px}
 .mq-ph.side img{filter:brightness(.88)}
 .mq-notes{list-style:none;margin:34px auto 0;padding:0 clamp(16px,4vw,48px);max-width:460px;display:grid;gap:10px}
-.mq-notes li{display:block;background:#fff;border-radius:16px;padding:12px 16px;border:1px solid rgba(15,50,38,.07);border-left:4px solid ${GOLD};text-align:left}
-.mq-notes b{display:block;font-size:16px;color:${GREEN2}}
-.mq-notes span{font-size:14px;color:${MUTED}}
+.mq-notes li{display:block;background:#0a1a14;border-radius:16px;padding:12px 16px;border:1px solid rgba(255,255,255,.1);border-left:4px solid ${GOLD};text-align:left}
+.mq-notes b{display:block;font-size:16px;color:#fff}
+.mq-notes span{font-size:14px;color:#9eb8ab}
 .mq-bar{display:flex}
 @media (min-width:640px){.mq-hero{grid-template-columns:1.1fr .9fr}}
 @media (min-width:860px){
@@ -170,7 +170,7 @@ function PhoneMockup() {
 function Screenshots({ h2Style }) {
   const [left, mid, right] = [shots[0], shots[1], shots[2]];
   return (
-    <section id="screenshots" aria-labelledby="screenshots-title" style={{ padding: "clamp(40px,7vw,90px) 0", background: "linear-gradient(180deg,#fff," + PAPER + ")" }}>
+    <section id="screenshots" aria-labelledby="screenshots-title" style={{ padding: "clamp(40px,7vw,90px) 0", background: DARK_BG }}>
       <div className="mq-wrap">
         <h2 id="screenshots-title" style={h2Style}>See MyQuran App in action</h2>
       </div>
@@ -192,12 +192,12 @@ function Screenshots({ h2Style }) {
         <div className="mq-row">
           {shots.map(([src, title, text]) => (
             <figure key={title} className="mq-shot">
-              <div style={{ background: "#0a1a14", borderRadius: 32, padding: 6, boxShadow: "0 18px 40px rgba(15,50,38,.25)", border: "2px solid " + GREEN }}>
+              <div style={{ background: "#0a1a14", borderRadius: 32, padding: 6, boxShadow: "0 18px 40px rgba(0,0,0,.25)", border: "2px solid " + GREEN3 }}>
                 <img src={src} alt={`${title}: MyQuran App Quran app screenshot`} loading="lazy" width="540" height="1170" style={{ display: "block", width: "100%", height: "auto", borderRadius: 26 }} />
               </div>
               <figcaption style={{ marginTop: 16 }}>
-                <b style={{ display: "block", fontSize: 17, color: GREEN2 }}>{title}</b>
-                <span style={{ fontSize: 14.5, color: MUTED }}>{text}</span>
+                <b style={{ display: "block", fontSize: 17, color: "#fff" }}>{title}</b>
+                <span style={{ fontSize: 14.5, color: "#9eb8ab" }}>{text}</span>
               </figcaption>
             </figure>
           ))}
@@ -221,31 +221,47 @@ function Homepage() {
   useEffect(() => {
     document.documentElement.lang = "en";
     document.title = "MyQuran App: Free Quran App with Translation, Audio & Tafsir";
+    
+    // Force the mobile system status bar to be green
+    let metaThemeColor = document.querySelector("meta[name='theme-color']");
+    if (!metaThemeColor) {
+      metaThemeColor = document.createElement("meta");
+      metaThemeColor.name = "theme-color";
+      document.head.appendChild(metaThemeColor);
+    }
+    metaThemeColor.setAttribute("content", GREEN);
   }, []);
 
-  const h2Style = {
+  // Styles for white background sections
+  const h2DarkStyle = {
     fontFamily: "'Playfair Display', Georgia, serif",
     fontSize: "clamp(24px, 5.5vw, 38px)",
     lineHeight: 1.2,
     letterSpacing: "-.5px",
     margin: "0 0 clamp(20px, 4vw, 36px)",
     textAlign: "center",
-    color: GREEN,
+    color: GREEN, // Dark text for white background
   };
-  const h2Left = { ...h2Style, textAlign: "left", fontSize: "clamp(22px, 4.5vw, 30px)", margin: "0 0 12px" };
-  const cardStyle = {
-    background: "#fff", borderRadius: 22, padding: "clamp(18px, 4vw, 26px)",
-    border: "1px solid rgba(15,50,38,.07)", boxShadow: "0 6px 24px rgba(15,50,38,.05)",
+  
+  const h2LeftDark = { ...h2DarkStyle, textAlign: "left", fontSize: "clamp(22px, 4.5vw, 30px)", margin: "0 0 12px" };
+
+  const whiteCardStyle = {
+    background: "#fff", 
+    borderRadius: 22, 
+    padding: "clamp(18px, 4vw, 26px)",
+    border: "1px solid rgba(15,50,38,.07)", 
+    boxShadow: "0 6px 24px rgba(15,50,38,.05)",
   };
+  
   const sectionPad = { padding: "clamp(40px, 7vw, 80px) 0" };
   const listStyle = { listStyle: "none", padding: 0, margin: 0, display: "flex", flexWrap: "wrap", gap: "8px 18px", color: INK, fontSize: 14.5 };
   const tick = <span style={{ color: GREEN3, fontWeight: 800 }} aria-hidden="true">✓</span>;
 
   return (
-    <div className="mq" style={{ fontFamily: "'Inter', system-ui, -apple-system, sans-serif", color: INK, background: PAPER, lineHeight: 1.65, width: "100%", minHeight: "100vh", overflowX: "hidden" }}>
+    <div className="mq" style={{ fontFamily: "system-ui, -apple-system, sans-serif", color: INK, background: PAPER, lineHeight: 1.65, width: "100%", minHeight: "100vh", overflowX: "hidden" }}>
       <style>{css}</style>
 
-      {/* HERO */}
+      {/* HERO (Green Background) */}
       <header
         style={{
           position: "relative", color: "#fff", overflow: "hidden", padding: "clamp(32px, 7vw, 90px) 0 0",
@@ -280,8 +296,8 @@ function Homepage() {
       </header>
 
       <main>
-        {/* STATS */}
-        <section aria-label="MyQuran App at a glance" style={{ background: GREEN, borderTop: "1px solid rgba(255,255,255,.06)", padding: "26px 0" }}>
+        {/* STATS (Transition strip) */}
+        <section aria-label="MyQuran App at a glance" style={{ background: GREEN2, borderTop: "1px solid rgba(255,255,255,.06)", padding: "26px 0", borderBottom: "1px solid rgba(255,255,255,.05)" }}>
           <div className="mq-wrap" style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 12, textAlign: "center" }}>
             {stats.map(([n, label]) => (
               <div key={label}>
@@ -292,15 +308,15 @@ function Homepage() {
           </div>
         </section>
 
-        <Screenshots h2Style={h2Style} />
+        <Screenshots h2Style={{ ...h2DarkStyle, color: "#fff" }} />
 
-        {/* FEATURES */}
-        <section id="features" aria-labelledby="features-title" style={sectionPad}>
+        {/* FEATURES (White Background) */}
+        <section id="features" aria-labelledby="features-title" style={{ ...sectionPad, background: "#fff" }}>
           <div className="mq-wrap">
-            <h2 id="features-title" style={h2Style}>Everything you need to read the Quran every day</h2>
+            <h2 id="features-title" style={h2DarkStyle}>Everything you need to read the Quran every day</h2>
             <div className="mq-grid">
               {features.map(([icon, title, text]) => (
-                <article key={title} style={cardStyle}>
+                <article key={title} style={whiteCardStyle}>
                   <div aria-hidden="true" style={{ width: 52, height: 52, borderRadius: 16, display: "grid", placeItems: "center", fontSize: 26, background: "linear-gradient(135deg, " + GREEN + ", " + GREEN3 + ")", marginBottom: 16 }}>{icon}</div>
                   <h3 style={{ margin: "0 0 8px", fontSize: "clamp(17px, 4vw, 20px)", color: GREEN2, fontWeight: 700 }}>{title}</h3>
                   <p style={{ margin: 0, color: MUTED, fontSize: "clamp(14px, 3.5vw, 16px)" }}>{text}</p>
@@ -310,18 +326,18 @@ function Homepage() {
           </div>
         </section>
 
-        {/* LANGUAGES + RECITERS */}
-        <section id="languages" aria-labelledby="lang-title" style={{ paddingBottom: "clamp(40px, 7vw, 80px)" }}>
+        {/* LANGUAGES + RECITERS (White Background) */}
+        <section id="languages" aria-labelledby="lang-title" style={{ paddingBottom: "clamp(40px, 7vw, 80px)", background: "#fff" }}>
           <div className="mq-wrap mq-two">
             <div>
-              <h2 id="lang-title" style={h2Left}>Quran translation in 10 languages</h2>
+              <h2 id="lang-title" style={h2LeftDark}>Quran translation in 10 languages</h2>
               <p style={{ color: MUTED, margin: "0 0 14px" }}>
                 Read the Quran in English, Urdu, Indonesian, Bengali and more. The app opens in your device language and you can switch anytime in Settings.
               </p>
               <ul style={listStyle}>{languages.map((l) => <li key={l}>{tick} {l}</li>)}</ul>
             </div>
             <div>
-              <h2 style={h2Left}>Quran audio by 16 reciters</h2>
+              <h2 style={h2LeftDark}>Quran audio by 16 reciters</h2>
               <p style={{ color: MUTED, margin: "0 0 14px" }}>
                 Continuous autoplay, skip between ayahs and switch reciters mid-surah. Translated recitations are also available in English, Persian and Urdu. Reciters include:
               </p>
@@ -330,23 +346,23 @@ function Homepage() {
           </div>
         </section>
 
-        {/* WHO IT'S FOR */}
-        <section id="who" aria-labelledby="who-title" style={{ paddingBottom: "clamp(40px, 7vw, 80px)" }}>
+        {/* WHO IT'S FOR (White Background) */}
+        <section id="who" aria-labelledby="who-title" style={{ paddingBottom: "clamp(40px, 7vw, 80px)", background: "#fff" }}>
           <div className="mq-wrap" style={{ maxWidth: 820 }}>
-            <h2 id="who-title" style={h2Style}>Made for every reader of the Quran</h2>
+            <h2 id="who-title" style={h2DarkStyle}>Made for every reader of the Quran</h2>
             <ul style={{ ...listStyle, display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(min(100%, 340px), 1fr))", gap: 12, fontSize: 16 }}>
-              {audience.map((a) => <li key={a} style={{ ...cardStyle, padding: "14px 18px" }}>{tick} {a}</li>)}
+              {audience.map((a) => <li key={a} style={{ ...whiteCardStyle, padding: "14px 18px" }}>{tick} {a}</li>)}
             </ul>
           </div>
         </section>
 
-        {/* FAQ */}
-        <section id="faq" aria-labelledby="faq-title" style={{ paddingBottom: "clamp(40px, 7vw, 80px)" }}>
+        {/* FAQ (White Background) */}
+        <section id="faq" aria-labelledby="faq-title" style={{ paddingBottom: "clamp(40px, 7vw, 80px)", background: "#fff" }}>
           <div className="mq-wrap" style={{ maxWidth: 820 }}>
-            <h2 id="faq-title" style={h2Style}>Frequently asked questions</h2>
+            <h2 id="faq-title" style={h2DarkStyle}>Frequently asked questions</h2>
             <div style={{ display: "grid", gap: 12 }}>
               {faqs.map(([q, a]) => (
-                <details key={q} style={{ ...cardStyle, padding: "16px 20px" }}>
+                <details key={q} style={{ ...whiteCardStyle, padding: "16px 20px" }}>
                   <summary style={{ cursor: "pointer", fontWeight: 700, color: GREEN2, fontSize: "clamp(16px, 4vw, 18px)" }}>{q}</summary>
                   <p style={{ margin: "10px 0 0", color: MUTED, fontSize: "clamp(14px, 3.5vw, 16px)" }}>{a}</p>
                 </details>
@@ -355,18 +371,19 @@ function Homepage() {
           </div>
         </section>
 
-        {/* FINAL CTA */}
+        {/* FINAL CTA (Green Background) */}
         <section id="download" aria-labelledby="cta-title" style={{ background: "linear-gradient(135deg, " + GREEN2 + ", " + GREEN + ")", color: "#fff", padding: "clamp(44px, 8vw, 90px) 0", textAlign: "center" }}>
           <div className="mq-wrap" style={{ maxWidth: 720, display: "flex", flexDirection: "column", alignItems: "center" }}>
             <img src={appimage} alt="" width="84" height="84" loading="lazy" style={{ width: 84, height: 84, borderRadius: 26, objectFit: "cover", marginBottom: 22, boxShadow: "0 16px 34px rgba(0,0,0,.35)", border: "3px solid rgba(255,255,255,.15)" }} />
-            <h2 id="cta-title" style={{ ...h2Style, color: "#fff", marginBottom: 12 }}>Make the Quran part of your every day</h2>
+            <h2 id="cta-title" style={{ ...h2DarkStyle, color: "#fff", marginBottom: 12 }}>Make the Quran part of your every day</h2>
             <p style={{ margin: "0 0 28px", color: "#cfe0d6", fontSize: "clamp(16px, 4vw, 18px)" }}>Download {APP_NAME} free on Google Play.</p>
             <PlayBadge place="cta" />
           </div>
         </section>
       </main>
 
-      <footer style={{ background: GREEN, color: "#a9bcb3", textAlign: "center", fontSize: 15, padding: "32px 0 96px" }}>
+      {/* FOOTER */}
+      <footer style={{ background: GREEN, color: "#a9bcb3", textAlign: "center", fontSize: 15, padding: "32px 0 96px", borderTop: "1px solid rgba(255,255,255,.05)" }}>
         <div className="mq-wrap">
           <p style={{ margin: "0 0 8px" }}>{APP_NAME} by almarufdevelopers</p>
           <p style={{ margin: 0, display: "flex", flexWrap: "wrap", justifyContent: "center", gap: 12 }}>
