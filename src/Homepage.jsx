@@ -346,7 +346,7 @@ function Homepage() {
           </div>
         </section>
 
-        {/* WHO IT'S FOR (White Background) */}
+        
         <section id="who" aria-labelledby="who-title" style={{ paddingBottom: "clamp(40px, 7vw, 80px)", background: "#fff" }}>
           <div className="mq-wrap" style={{ maxWidth: 820 }}>
             <h2 id="who-title" style={h2DarkStyle}>Made for every reader of the Quran</h2>
@@ -368,6 +368,7 @@ function Homepage() {
                 </details>
               ))}
             </div>
+            
           </div>
         </section>
 
