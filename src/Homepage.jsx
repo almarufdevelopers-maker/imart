@@ -261,7 +261,7 @@ function Homepage() {
     <div className="mq" style={{ fontFamily: "system-ui, -apple-system, sans-serif", color: INK, background: PAPER, lineHeight: 1.65, width: "100%", minHeight: "100vh", overflowX: "hidden" }}>
       <style>{css}</style>
 
-      {/* HERO (Green Background) */}
+      
       <header
         style={{
           position: "relative", color: "#fff", overflow: "hidden", padding: "clamp(32px, 7vw, 90px) 0 0",
