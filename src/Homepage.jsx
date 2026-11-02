@@ -1,425 +1,243 @@
-import { useEffect, useState } from "react";
-import appimage from "./assets/1.webp";
-import shotSurahs from "./assets/shot-surahs.webp";
-import shotReading from "./assets/shot-reading.webp";
-import shotStreak from "./assets/shot-streak.webp";
+import { useEffect, useMemo, useState } from "react";
 
-const PLAY_URL = "https://play.google.com/store/apps/details?id=com.jamia26.myquranapp";
-const APP_NAME = "MyQuran App";
+// ====== EDIT THESE ======
+const STORE = "iMart";
+const WHATSAPP = "254724821735"; // 0724821735 in international format
+const EMAIL = "abdihakimiibrahim47@gmail.com";
 
-const GREEN = "#0f3226";
-const GREEN2 = "#1c4a3a";
-const GREEN3 = "#2a6650";
-const GOLD = "#f5d90a";
-const DARK_BG = "#06120e"; 
-const PAPER = "#fbfaf6";
-const INK = "#2a3b33";
-const MUTED = "#556b60"; 
-
-const features = [
-  ["📖", "Read the Quran in 10 languages", "English, French, Spanish, Indonesian, Turkish, Urdu, Bengali, Chinese, Russian and Swedish. Switch with one tap."],
-  ["🎧", "Quran audio, verse by verse", "Listen to 16 reciters including Sudais, Alafasy and Abdul Basit. Autoplay, skip ayahs and change reciter mid-surah."],
-  ["📚", "Tafsir Ibn Kathir offline", "The complete tafsir for all 114 surahs, ayah by ayah, with no internet needed."],
-  ["🔥", "Daily Quran reading streak", "Track your current streak, longest streak and total days read. Gentle reminders work offline."],
-  ["🔖", "Bookmarks and private reflections", "Save any verse with its Arabic text, translation and date. Write notes that stay on your phone."],
-  ["🔍", "Search the Quran offline", "Search by surah name, jump to surah:ayah, or find any word across the translation."],
+// Sample catalogue with online images
+const PRODUCTS = [
+  { id: 1, name: "Quran, Uthmani Script", cat: "Quran", price: 1800, img: "https://images.unsplash.com/photo-1609599006353-e629aaabfeae?w=600&auto=format&fit=crop&q=80", tint: "#dfeee6", desc: "Clear Arabic text, hardcover, easy on the eyes." },
+  { id: 2, name: "Quran with English Translation", cat: "Quran", price: 2400, img: "https://images.unsplash.com/photo-1585036156171-384164a8c675?w=600&auto=format&fit=crop&q=80", tint: "#e6ecf5", desc: "Arabic and English side by side." },
+  { id: 3, name: "Tajweed Quran, Colour Coded", cat: "Quran", price: 2600, img: "https://images.unsplash.com/photo-1542816417-0983c9c9ad53?w=600&auto=format&fit=crop&q=80", tint: "#f5e8e1", desc: "Colour-coded rules to help your recitation." },
+  { id: 4, name: "Pocket Quran", cat: "Quran", price: 900, img: "https://images.unsplash.com/photo-1591604129939-f1efa4d9f7fa?w=600&auto=format&fit=crop&q=80", tint: "#e4efdc", desc: "Small enough for your bag or jacket." },
+  { id: 5, name: "Fortress of the Muslim", cat: "Islamic Books", price: 500, img: "https://images.unsplash.com/photo-1544716278-ca5e3f4abd8c?w=600&auto=format&fit=crop&q=80", tint: "#e1ebf3", desc: "Daily duas from the Quran and Sunnah." },
+  { id: 6, name: "Stories of the Prophets", cat: "Islamic Books", price: 1500, img: "https://images.unsplash.com/photo-1512820790803-83ca734da794?w=600&auto=format&fit=crop&q=80", tint: "#f4ecd9", desc: "The lives of the prophets, told simply." },
+  { id: 7, name: "Seerah of the Prophet ﷺ", cat: "Islamic Books", price: 1700, img: "https://images.unsplash.com/photo-1532012197267-da84d127e765?w=600&auto=format&fit=crop&q=80", tint: "#e9e4f3", desc: "A readable account of the Prophet's life." },
+  { id: 8, name: "Riyad as-Salihin", cat: "Hadith", price: 2200, img: "https://images.unsplash.com/photo-1495446815901-a7297e633e8d?w=600&auto=format&fit=crop&q=80", tint: "#f6e6d3", desc: "Hadith on character, worship and daily life." },
+  { id: 9, name: "Forty Hadith of an-Nawawi", cat: "Hadith", price: 600, img: "https://images.unsplash.com/photo-1524995997946-a1c2e315a42f?w=600&auto=format&fit=crop&q=80", tint: "#f3dede", desc: "The classic collection with short explanations." },
+  { id: 10, name: "Sahih al-Bukhari, Summarised", cat: "Hadith", price: 3200, img: "https://images.unsplash.com/photo-1589998059171-988d887df646?w=600&auto=format&fit=crop&q=80", tint: "#e0eeee", desc: "A shortened edition for everyday reading." },
+  { id: 11, name: "Padded Prayer Mat", cat: "Accessories", price: 1200, img: "https://images.unsplash.com/photo-1590076215667-875d7abdd0e8?w=600&auto=format&fit=crop&q=80", tint: "#dfeee6", desc: "Soft, easy to fold, with a compass-free design." },
+  { id: 12, name: "Tasbih, 99 Beads", cat: "Accessories", price: 350, img: "https://images.unsplash.com/photo-1584285405429-136bf988919c?w=600&auto=format&fit=crop&q=80", tint: "#f4ecd9", desc: "Smooth beads on a strong cord." },
+  { id: 13, name: "Wooden Quran Stand", cat: "Accessories", price: 1400, img: "https://images.unsplash.com/photo-1590076215667-875d7abdd0e8?w=600&auto=format&fit=crop&q=80", tint: "#f1e4d6", desc: "Folds flat, holds large and small books." },
+  { id: 14, name: "Miswak Pack of 5", cat: "Accessories", price: 250, img: "https://images.unsplash.com/photo-1607613009820-a29f7bb81c04?w=600&auto=format&fit=crop&q=80", tint: "#e4efdc", desc: "Natural, individually wrapped." },
 ];
+const CATS = ["All", "Quran", "Islamic Books", "Hadith", "Accessories"];
 
-const stats = [["10", "languages"], ["16", "reciters"], ["114", "surahs with tafsir"]];
-
-const shots = [
-  [shotSurahs, "Find any surah fast", "Search by name, ayah or word."],
-  [shotReading, "Read and listen", "Arabic, translation, audio and tafsir for every ayah."],
-  [shotStreak, "Keep your streak", "Track your reading and get daily reminders."],
-];
-
-const trust = ["Free to download", "No ads", "No subscriptions", "Works offline"];
-
-const languages = ["English", "French", "Spanish", "Indonesian", "Turkish", "Urdu", "Bengali", "Chinese", "Russian", "Swedish"];
-
-const reciters = [
-  "Abdurrahman As-Sudais", "Mishary Rashid Alafasy", "Abdul Basit (Murattal)", "Abdul Basit (Mujawwad)",
-  "Saad Al-Ghamdi", "Saood Ash-Shuraym", "Yasser Ad-Dussary", "Abdullah Basfar",
-  "Ali Jaber", "Hudhaify", "Salaah Bukhatir", "Abdul Samad",
-];
-
-const audience = [
-  "Anyone starting their journey with the Quran",
-  "Huffaz and students reviewing memorization",
-  "Students of tafsir and translation",
-  "Parents teaching children at home",
-  "New Muslims learning in their own language",
-  "Daily readers building a habit",
-];
-
-const faqs = [
-  ["What is MyQuran App?", "MyQuran App is a free Quran app for Android with translation in 10 languages, verse-by-verse audio by 16 reciters, offline Tafsir Ibn Kathir, bookmarks, reflections and a daily reading streak."],
-  ["Is MyQuran App free? Are there ads?", "MyQuran App is free to download and use, with no ads and no subscriptions. Optional in-app purchases are available if you want to support the developers."],
-  ["Does the Quran app work offline?", "Yes. You can read the Quran, Tafsir Ibn Kathir, bookmarks and reflections without internet. Only audio recitation needs a connection."],
-  ["Which languages does the Quran translation support?", "English, French, Spanish, Indonesian, Turkish, Urdu, Bengali, Chinese, Russian and Swedish. The app opens in your device language and you can change it in Settings."],
-  ["Which reciters are in the app?", "16 reciters including Abdurrahman As-Sudais, Mishary Rashid Alafasy, Abdul Basit (Murattal and Mujawwad), Saad Al-Ghamdi and Saood Ash-Shuraym, with translated recitations in English, Persian and Urdu."],
-  ["Is MyQuran App available on iPhone?", "Not yet. MyQuran App is available on Android 7.0 and up through Google Play. The download is about 118 MB because the Quran text and tafsir are stored offline."],
-];
-
-const track = (place) => {
-  try {
-    if (typeof window !== "undefined" && window.gtag) window.gtag("event", "download_click", { location: place });
-  } catch (e) {
-    /* analytics must never break the page */
-  }
+const C = {
+  green: "#12372a", green2: "#1f5a43", cream: "#f7f1e6", card: "#fffdf8",
+  gold: "#c8962e", ink: "#23302a", muted: "#667569", line: "#e6dccb",
 };
+const money = (n) => "KSh " + n.toLocaleString("en-KE");
+const serif = "'Playfair Display', Georgia, serif";
 
-const css = `
-.mq *{box-sizing:border-box}
-.mq a:focus-visible,.mq button:focus-visible{outline:3px solid ${GOLD};outline-offset:3px}
-.mq-wrap{max-width:1100px;margin:0 auto;width:100%;padding:0 clamp(16px,4vw,48px)}
-.mq-badge{transition:transform .2s ease,border-color .2s ease}
-.mq-badge:hover{transform:translateY(-2px);border-color:#fff}
-.mq-hero{display:grid;gap:clamp(20px,5vw,64px);align-items:center;grid-template-columns:1fr}
-.mq-grid{display:grid;gap:18px;grid-template-columns:repeat(auto-fit,minmax(min(100%,300px),1fr))}
-.mq-two{display:grid;gap:32px;grid-template-columns:repeat(auto-fit,minmax(min(100%,320px),1fr))}
-/* Desktop/tablet: three phones in a row */
-.mq-row{display:none}
-/* Mobile: overlapping fan of three phones, all visible at once */
-.mq-fan{display:flex;justify-content:center;align-items:center;padding:8px 0 4px;overflow:hidden}
-.mq-ph{flex:none;background:#0a1a14;border:2px solid ${GREEN3};padding:5px;border-radius:26px;box-shadow:0 18px 38px rgba(0,0,0,.28)}
-.mq-ph img{display:block;width:100%;height:auto;border-radius:21px}
-.mq-ph.side{width:min(30vw,150px);margin:0 calc(-1 * min(7vw,36px));position:relative;z-index:1}
-.mq-ph.side.l{transform:translateY(22px) rotate(-7deg)}
-.mq-ph.side.r{transform:translateY(22px) rotate(7deg)}
-.mq-ph.mid{width:min(42vw,210px);position:relative;z-index:2;border-radius:30px;border-color:${GOLD};box-shadow:0 26px 50px rgba(0,0,0,.38)}
-.mq-ph.mid img{border-radius:25px}
-.mq-ph.side img{filter:brightness(.88)}
-.mq-notes{list-style:none;margin:34px auto 0;padding:0 clamp(16px,4vw,48px);max-width:460px;display:grid;gap:10px}
-.mq-notes li{display:block;background:#0a1a14;border-radius:16px;padding:12px 16px;border:1px solid rgba(255,255,255,.1);border-left:4px solid ${GOLD};text-align:left}
-.mq-notes b{display:block;font-size:16px;color:#fff}
-.mq-notes span{font-size:14px;color:#9eb8ab}
-.mq-bar{display:flex}
-@media (min-width:640px){.mq-hero{grid-template-columns:1.1fr .9fr}}
-@media (min-width:860px){
-  .mq-fan,.mq-notes{display:none}
-  .mq-row{display:flex;justify-content:center;gap:clamp(24px,4vw,56px)}
-  .mq-shot{flex:1 1 0;max-width:300px;margin:0;text-align:center}
-  .mq-bar{display:none}
+function useWidth() {
+  const [w, setW] = useState(typeof window !== "undefined" ? window.innerWidth : 390);
+  useEffect(() => {
+    const f = () => setW(window.innerWidth);
+    window.addEventListener("resize", f);
+    return () => window.removeEventListener("resize", f);
+  }, []);
+  return w;
 }
-@media (max-width:639px){
-  .mq-hero-text{text-align:center}
-  .mq-hero-text .mq-trust{justify-content:center}
-  .mq-hero-text .mq-cta{display:flex;justify-content:center}
-  .mq-chip{margin-left:auto;margin-right:auto}
-}
-@media (prefers-reduced-motion:reduce){.mq *{transition:none!important;scroll-behavior:auto!important}}
-`;
 
-function PlayLogo({ size = 30 }) {
+function Stepper({ q, onMinus, onPlus, big }) {
+  const b = { width: big ? 44 : 40, height: big ? 44 : 40, border: "1px solid " + C.line, background: "#fff", borderRadius: 12, fontSize: 20, fontWeight: 700, color: C.green, cursor: "pointer" };
   return (
-    <svg width={size} height={size} viewBox="30 0 480 512" aria-hidden="true" style={{ flexShrink: 0 }}>
-      <path fill="#00A0FF" d="M48.2 28.5c-3.1 3.3-4.9 8.4-4.9 15v424.9c0 6.6 1.8 11.7 4.9 15l.8.8L287.7 245v-5.8L49 27.7l-.8.8z" />
-      <path fill="#FFE000" d="M367.2 325.6l-79.5-79.6v-5.8l79.5-79.6 1.8 1 94.2 53.5c26.9 15.3 26.9 40.3 0 55.6l-94.2 53.5-1.8 1z" />
-      <path fill="#FF3A44" d="M369 324.6L287.7 243 48.2 482.5c8.9 9.4 23.5 10.5 40 1.2L369 324.6z" />
-      <path fill="#00F076" d="M369 161.4L88.2 2.3c-16.5-9.3-31.1-8.2-40 1.2L287.7 243 369 161.4z" />
-    </svg>
-  );
-}
-
-function PlayBadge({ place }) {
-  return (
-    <a
-      className="mq-badge"
-      href={PLAY_URL}
-      target="_blank"
-      rel="noopener noreferrer"
-      aria-label="Download MyQuran App on Google Play"
-      onClick={() => track(place)}
-      style={{
-        display: "inline-flex", alignItems: "center", gap: 12, textDecoration: "none", color: "#fff",
-        background: "#000", border: "1.5px solid #a6a6a6", borderRadius: 14, padding: "10px 24px 10px 18px",
-        minHeight: 60, boxShadow: "0 10px 30px rgba(0,0,0,.35)", width: "100%", maxWidth: 300, justifyContent: "center",
-      }}
-    >
-      <PlayLogo />
-      <span style={{ display: "flex", flexDirection: "column", lineHeight: 1, textAlign: "left" }}>
-        <small style={{ fontSize: 11, letterSpacing: ".6px", fontWeight: 500, opacity: 0.9 }}>Get it on</small>
-        <strong style={{ fontSize: 25, fontWeight: 600, letterSpacing: "-.3px", marginTop: 3 }}>Google Play</strong>
-      </span>
-    </a>
-  );
-}
-
-function PhoneMockup() {
-  return (
-    <div style={{ position: "relative", display: "flex", justifyContent: "center", alignItems: "flex-end", width: "100%", minHeight: 260 }}>
-      <div style={{ position: "absolute", width: "80%", height: "70%", top: "10%", borderRadius: "50%", background: "rgba(245,217,10,.18)", filter: "blur(70px)" }} />
-      <div
-        style={{
-          position: "relative", width: "min(250px, 62vw)", background: "#0a1a14", borderRadius: "36px 36px 0 0",
-          padding: "9px 9px 0", border: "2px solid rgba(255,255,255,.18)", borderBottom: 0, boxShadow: "0 30px 70px rgba(0,0,0,.45)",
-        }}
-      >
-        <img
-          src={shotReading}
-          alt="MyQuran App reading screen with Arabic Quran text, translation and verse-by-verse audio"
-          width="540" height="1170" loading="eager" fetchPriority="high"
-          style={{ display: "block", width: "100%", height: "auto", borderRadius: "28px 28px 0 0" }}
-        />
-      </div>
+    <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 8 }}>
+      <button aria-label="Remove one" onClick={onMinus} style={b}>−</button>
+      <b style={{ minWidth: 24, textAlign: "center", color: C.ink }}>{q}</b>
+      <button aria-label="Add one" onClick={onPlus} style={b}>+</button>
     </div>
   );
 }
 
-function Screenshots({ h2Style }) {
-  const [left, mid, right] = [shots[0], shots[1], shots[2]];
-  return (
-    <section id="screenshots" aria-labelledby="screenshots-title" style={{ padding: "clamp(40px,7vw,90px) 0", background: DARK_BG }}>
-      <div className="mq-wrap">
-        <h2 id="screenshots-title" style={h2Style}>See MyQuran App in action</h2>
-      </div>
+export default function IMart() {
+  const w = useWidth();
+  const phone = w < 640;
+  const cols = w < 520 ? 2 : w < 900 ? 3 : 4;
 
-      {/* Mobile: fanned phones + short notes */}
-      <div className="mq-fan" role="img" aria-label="Three MyQuran App screens: surah search, reading with audio, and reading streak">
-        <div className="mq-ph side l"><img src={left[0]} alt="" width="540" height="1170" loading="lazy" /></div>
-        <div className="mq-ph mid"><img src={mid[0]} alt="" width="540" height="1170" loading="lazy" /></div>
-        <div className="mq-ph side r"><img src={right[0]} alt="" width="540" height="1170" loading="lazy" /></div>
-      </div>
-      <ul className="mq-notes">
-        {shots.map(([, title, text]) => (
-          <li key={title}><b>{title}</b><span>{text}</span></li>
-        ))}
-      </ul>
-
-      {/* Desktop and tablet: three phones side by side */}
-      <div className="mq-wrap">
-        <div className="mq-row">
-          {shots.map(([src, title, text]) => (
-            <figure key={title} className="mq-shot">
-              <div style={{ background: "#0a1a14", borderRadius: 32, padding: 6, boxShadow: "0 18px 40px rgba(0,0,0,.25)", border: "2px solid " + GREEN3 }}>
-                <img src={src} alt={`${title}: MyQuran App Quran app screenshot`} loading="lazy" width="540" height="1170" style={{ display: "block", width: "100%", height: "auto", borderRadius: 26 }} />
-              </div>
-              <figcaption style={{ marginTop: 16 }}>
-                <b style={{ display: "block", fontSize: 17, color: "#fff" }}>{title}</b>
-                <span style={{ fontSize: 14.5, color: "#9eb8ab" }}>{text}</span>
-              </figcaption>
-            </figure>
-          ))}
-        </div>
-      </div>
-    </section>
-  );
-}
-
-function Homepage() {
-  const [showBar, setShowBar] = useState(false);
+  const [cat, setCat] = useState("All");
+  const [query, setQuery] = useState("");
+  const [cart, setCart] = useState({}); // id -> qty
+  const [open, setOpen] = useState(false);
+  const [step, setStep] = useState("cart"); // cart | details
+  const [form, setForm] = useState({ name: "", phone: "", place: "", note: "" });
 
   useEffect(() => {
-    const onScroll = () => setShowBar(window.scrollY > 520);
-    onScroll();
-    window.addEventListener("scroll", onScroll, { passive: true });
-    return () => window.removeEventListener("scroll", onScroll);
-  }, []);
-
-  // Full meta tags, Open Graph and JSON-LD live in index.html so crawlers (WhatsApp, Facebook, Google) see them.
-  useEffect(() => {
+    document.title = "iMart | Quran, Islamic Books, Hadith & Accessories";
     document.documentElement.lang = "en";
-    document.title = "MyQuran App: Free Quran App with Translation, Audio & Tafsir";
-    
-    // Force the mobile system status bar to be green
-    let metaThemeColor = document.querySelector("meta[name='theme-color']");
-    if (!metaThemeColor) {
-      metaThemeColor = document.createElement("meta");
-      metaThemeColor.name = "theme-color";
-      document.head.appendChild(metaThemeColor);
-    }
-    metaThemeColor.setAttribute("content", GREEN);
   }, []);
 
-  // Styles for white background sections
-  const h2DarkStyle = {
-    fontFamily: "'Playfair Display', Georgia, serif",
-    fontSize: "clamp(24px, 5.5vw, 38px)",
-    lineHeight: 1.2,
-    letterSpacing: "-.5px",
-    margin: "0 0 clamp(20px, 4vw, 36px)",
-    textAlign: "center",
-    color: GREEN, // Dark text for white background
-  };
-  
-  const h2LeftDark = { ...h2DarkStyle, textAlign: "left", fontSize: "clamp(22px, 4.5vw, 30px)", margin: "0 0 12px" };
+  const list = useMemo(() => {
+    const q = query.trim().toLowerCase();
+    return PRODUCTS.filter((p) => (cat === "All" || p.cat === cat) && (!q || (p.name + " " + p.desc).toLowerCase().includes(q)));
+  }, [cat, query]);
 
-  const whiteCardStyle = {
-    background: "#fff", 
-    borderRadius: 22, 
-    padding: "clamp(18px, 4vw, 26px)",
-    border: "1px solid rgba(15,50,38,.07)", 
-    boxShadow: "0 6px 24px rgba(15,50,38,.05)",
+  const lines = PRODUCTS.filter((p) => cart[p.id]).map((p) => ({ ...p, qty: cart[p.id] }));
+  const count = lines.reduce((s, l) => s + l.qty, 0);
+  const total = lines.reduce((s, l) => s + l.qty * l.price, 0);
+
+  const add = (id) => setCart((c) => ({ ...c, [id]: (c[id] || 0) + 1 }));
+  const sub = (id) => setCart((c) => {
+    const n = { ...c };
+    if (n[id] > 1) n[id] -= 1; else delete n[id];
+    return n;
+  });
+
+  const closeCart = () => { setOpen(false); setStep("cart"); };
+  const ready = form.name.trim() && form.phone.trim() && form.place.trim();
+
+  const placeOrder = () => {
+    const rows = lines.map((l) => `• ${l.qty} x ${l.name} (${money(l.price * l.qty)})`).join("\n");
+    const msg = `Hello ${STORE}, I would like to order:\n${rows}\n\nTotal: ${money(total)}\n\nName: ${form.name}\nPhone: ${form.phone}\nDelivery area: ${form.place}${form.note ? "\nNote: " + form.note : ""}`;
+    window.open(`https://wa.me/${WHATSAPP}?text=${encodeURIComponent(msg)}`, "_blank", "noopener");
   };
-  
-  const sectionPad = { padding: "clamp(40px, 7vw, 80px) 0" };
-  const listStyle = { listStyle: "none", padding: 0, margin: 0, display: "flex", flexWrap: "wrap", gap: "8px 18px", color: INK, fontSize: 14.5 };
-  const tick = <span style={{ color: GREEN3, fontWeight: 800 }} aria-hidden="true">✓</span>;
+
+  const input = { width: "100%", boxSizing: "border-box", padding: "13px 14px", fontSize: 16, border: "1px solid " + C.line, borderRadius: 12, background: "#fff", color: C.ink, fontFamily: "inherit", outline: "none" };
+  const pad = phone ? 16 : 32;
 
   return (
-    <div className="mq" style={{ fontFamily: "system-ui, -apple-system, sans-serif", color: INK, background: PAPER, lineHeight: 1.65, width: "100%", minHeight: "100vh", overflowX: "hidden" }}>
-      <style>{css}</style>
-
-      
-      <header
-        style={{
-          position: "relative", color: "#fff", overflow: "hidden", padding: "clamp(32px, 7vw, 90px) 0 0",
-          background: "radial-gradient(900px 500px at 85% 20%, rgba(245,217,10,.14), transparent 60%), linear-gradient(135deg, " + GREEN + " 0%, " + GREEN2 + " 100%)",
-        }}
-      >
-        <div className="mq-wrap mq-hero">
-          <div className="mq-hero-text" style={{ paddingBottom: "clamp(8px, 4vw, 80px)" }}>
-            <div
-              className="mq-chip"
-              style={{ display: "flex", width: "fit-content", alignItems: "center", gap: 10, padding: "6px 16px 6px 6px", borderRadius: 999, background: "rgba(255,255,255,.1)", border: "1px solid rgba(255,255,255,.14)", fontWeight: 600, fontSize: 15, marginBottom: 20 }}
-            >
-              <img src={appimage} alt="MyQuran App icon" width="32" height="32" style={{ width: 32, height: 32, borderRadius: 10, objectFit: "cover" }} />
-              <span>{APP_NAME}</span>
+    <div style={{ fontFamily: "'Inter', system-ui, -apple-system, sans-serif", background: C.cream, color: C.ink, minHeight: "100vh", lineHeight: 1.5, paddingBottom: phone && count ? 90 : 0 }}>
+      {/* HEADER */}
+      <header style={{ position: "sticky", top: 0, zIndex: 20, background: C.green, color: "#fff", padding: `12px ${pad}px 0`, boxShadow: "0 4px 18px rgba(0,0,0,.18)" }}>
+        <div style={{ maxWidth: 1100, margin: "0 auto" }}>
+          <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
+            <div style={{ fontFamily: serif, fontSize: 26, fontWeight: 700, letterSpacing: "-.5px", flex: 1 }}>
+              <span style={{ color: C.gold }}>i</span>Mart
             </div>
-            <h1 style={{ fontFamily: "'Playfair Display', Georgia, serif", fontWeight: 700, fontSize: "clamp(30px, 7.5vw, 58px)", lineHeight: 1.1, letterSpacing: "-1px", margin: "0 0 16px" }}>
-              Free Quran app with translation, audio and offline tafsir
-            </h1>
-            <p style={{ fontSize: "clamp(16px, 4vw, 20px)", color: "#d6e4dc", maxWidth: "30em", margin: "0 auto 28px 0" }}>
-              {APP_NAME} lets you read the Quran in 10 languages, listen to 16 reciters and study Tafsir Ibn Kathir offline. No ads. No subscriptions.
-            </p>
-            <div className="mq-cta"><PlayBadge place="hero" /></div>
-            <p style={{ margin: "10px 0 0", fontSize: 13.5, color: "#b9cdc3" }}>Android 7.0 and up · iPhone version not available yet</p>
-            <ul className="mq-trust" style={{ listStyle: "none", padding: 0, margin: "20px 0 0", display: "flex", flexWrap: "wrap", gap: "8px 18px", fontSize: 14.5, color: "#cfe0d6" }}>
-              {trust.map((t) => (
-                <li key={t}><span style={{ color: GOLD, fontWeight: 800 }} aria-hidden="true">✓</span> {t}</li>
-              ))}
-            </ul>
+            {!phone && (
+              <input aria-label="Search products" placeholder="Search Qurans, books, accessories" value={query} onChange={(e) => setQuery(e.target.value)} style={{ ...input, maxWidth: 360, background: "rgba(255,255,255,.95)" }} />
+            )}
+            <button onClick={() => setOpen(true)} aria-label={`Open cart, ${count} items`} style={{ position: "relative", height: 44, padding: "0 16px", borderRadius: 14, border: "1px solid rgba(255,255,255,.25)", background: "rgba(255,255,255,.1)", color: "#fff", fontSize: 15, fontWeight: 600, cursor: "pointer" }}>
+              🛒 Cart
+              {count > 0 && <span style={{ position: "absolute", top: -6, right: -6, minWidth: 22, height: 22, borderRadius: 11, background: C.gold, color: C.green, fontSize: 12, fontWeight: 800, display: "grid", placeItems: "center", padding: "0 5px" }}>{count}</span>}
+            </button>
           </div>
-          <PhoneMockup />
+          {phone && (
+            <input aria-label="Search products" placeholder="Search Qurans, books, accessories" value={query} onChange={(e) => setQuery(e.target.value)} style={{ ...input, marginTop: 10 }} />
+          )}
+          <nav aria-label="Categories" style={{ display: "flex", gap: 8, overflowX: "auto", padding: "12px 0", scrollbarWidth: "none" }}>
+            {CATS.map((c) => (
+              <button key={c} onClick={() => setCat(c)} style={{ flex: "none", height: 38, padding: "0 16px", borderRadius: 999, border: "1px solid " + (cat === c ? C.gold : "rgba(255,255,255,.22)"), background: cat === c ? C.gold : "transparent", color: cat === c ? C.green : "#fff", fontWeight: 600, fontSize: 14, cursor: "pointer", whiteSpace: "nowrap" }}>{c}</button>
+            ))}
+          </nav>
         </div>
       </header>
 
-      <main>
-        {/* STATS (Transition strip) */}
-        <section aria-label="MyQuran App at a glance" style={{ background: GREEN2, borderTop: "1px solid rgba(255,255,255,.06)", padding: "26px 0", borderBottom: "1px solid rgba(255,255,255,.05)" }}>
-          <div className="mq-wrap" style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 12, textAlign: "center" }}>
-            {stats.map(([n, label]) => (
-              <div key={label}>
-                <b style={{ display: "block", fontFamily: "'Playfair Display', serif", fontSize: "clamp(26px, 6vw, 42px)", color: GOLD, lineHeight: 1.1 }}>{n}</b>
-                <span style={{ fontSize: "clamp(12px, 3vw, 15px)", color: "#b9cdc3" }}>{label}</span>
+      {/* HERO */}
+      <section style={{ background: `linear-gradient(135deg, ${C.green}, ${C.green2})`, color: "#fff", padding: `${phone ? 28 : 56}px ${pad}px` }}>
+        <div style={{ maxWidth: 1100, margin: "0 auto", textAlign: phone ? "center" : "left" }}>
+          <h1 style={{ fontFamily: serif, fontSize: phone ? 28 : 46, lineHeight: 1.12, margin: "0 0 10px", letterSpacing: "-.5px" }}>Quran, Islamic books and everyday essentials</h1>
+          <p style={{ margin: 0, fontSize: phone ? 15 : 18, color: "#d3e3da", maxWidth: 560 }}>Browse, add to your cart and send your order on WhatsApp. We confirm it with you directly.</p>
+        </div>
+      </section>
+
+      {/* PRODUCTS */}
+      <main style={{ maxWidth: 1100, margin: "0 auto", padding: `${phone ? 22 : 40}px ${pad}px 48px` }}>
+        <h2 style={{ fontFamily: serif, fontSize: phone ? 22 : 28, margin: "0 0 16px", color: C.green }}>{cat === "All" ? "All products" : cat} <span style={{ fontSize: 14, fontFamily: "inherit", color: C.muted, fontWeight: 400 }}>({list.length})</span></h2>
+        {list.length === 0 && <p style={{ color: C.muted }}>No products match your search. Try another word or category.</p>}
+        <div style={{ display: "grid", gridTemplateColumns: `repeat(${cols}, minmax(0, 1fr))`, gap: phone ? 12 : 20 }}>
+          {list.map((p) => (
+            <article key={p.id} style={{ background: C.card, border: "1px solid " + C.line, borderRadius: 18, overflow: "hidden", display: "flex", flexDirection: "column", boxShadow: "0 4px 16px rgba(18,55,42,.06)" }}>
+              <div style={{ background: p.tint, height: phone ? 112 : 150, position: "relative", overflow: "hidden" }}>
+                <img
+                  src={p.img}
+                  alt={p.name}
+                  loading="lazy"
+                  style={{ width: "100%", height: "100%", objectFit: "cover", display: "block" }}
+                />
+                <span style={{ position: "absolute", left: 10, top: 10, fontSize: 11, fontWeight: 700, color: C.green2, background: "rgba(255,255,255,.85)", padding: "3px 9px", borderRadius: 999 }}>{p.cat}</span>
               </div>
-            ))}
-          </div>
-        </section>
-
-        <Screenshots h2Style={{ ...h2DarkStyle, color: "#fff" }} />
-
-        {/* FEATURES (White Background) */}
-        <section id="features" aria-labelledby="features-title" style={{ ...sectionPad, background: "#fff" }}>
-          <div className="mq-wrap">
-            <h2 id="features-title" style={h2DarkStyle}>Everything you need to read the Quran every day</h2>
-            <div className="mq-grid">
-              {features.map(([icon, title, text]) => (
-                <article key={title} style={whiteCardStyle}>
-                  <div aria-hidden="true" style={{ width: 52, height: 52, borderRadius: 16, display: "grid", placeItems: "center", fontSize: 26, background: "linear-gradient(135deg, " + GREEN + ", " + GREEN3 + ")", marginBottom: 16 }}>{icon}</div>
-                  <h3 style={{ margin: "0 0 8px", fontSize: "clamp(17px, 4vw, 20px)", color: GREEN2, fontWeight: 700 }}>{title}</h3>
-                  <p style={{ margin: 0, color: MUTED, fontSize: "clamp(14px, 3.5vw, 16px)" }}>{text}</p>
-                </article>
-              ))}
-            </div>
-          </div>
-        </section>
-
-        {/* LANGUAGES + RECITERS (White Background) */}
-        <section id="languages" aria-labelledby="lang-title" style={{ paddingBottom: "clamp(40px, 7vw, 80px)", background: "#fff" }}>
-          <div className="mq-wrap mq-two">
-            <div>
-              <h2 id="lang-title" style={h2LeftDark}>Quran translation in 10 languages</h2>
-              <p style={{ color: MUTED, margin: "0 0 14px" }}>
-                Read the Quran in English, Urdu, Indonesian, Bengali and more. The app opens in your device language and you can switch anytime in Settings.
-              </p>
-              <ul style={listStyle}>{languages.map((l) => <li key={l}>{tick} {l}</li>)}</ul>
-            </div>
-            <div>
-              <h2 style={h2LeftDark}>Quran audio by 16 reciters</h2>
-              <p style={{ color: MUTED, margin: "0 0 14px" }}>
-                Continuous autoplay, skip between ayahs and switch reciters mid-surah. Translated recitations are also available in English, Persian and Urdu. Reciters include:
-              </p>
-              <ul style={listStyle}>{reciters.map((r) => <li key={r}>{tick} {r}</li>)}</ul>
-            </div>
-          </div>
-        </section>
-
-        
-        <section id="who" aria-labelledby="who-title" style={{ paddingBottom: "clamp(40px, 7vw, 80px)", background: "#fff" }}>
-          <div className="mq-wrap" style={{ maxWidth: 820 }}>
-            <h2 id="who-title" style={h2DarkStyle}>Made for every reader of the Quran</h2>
-            <ul style={{ ...listStyle, display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(min(100%, 340px), 1fr))", gap: 12, fontSize: 16 }}>
-              {audience.map((a) => <li key={a} style={{ ...whiteCardStyle, padding: "14px 18px" }}>{tick} {a}</li>)}
-            </ul>
-          </div>
-        </section>
-
-        {/* FAQ (White Background) */}
-        <section id="faq" aria-labelledby="faq-title" style={{ paddingBottom: "clamp(40px, 7vw, 80px)", background: "#fff" }}>
-          <div className="mq-wrap" style={{ maxWidth: 820 }}>
-            <h2 id="faq-title" style={h2DarkStyle}>Frequently asked questions</h2>
-            <div style={{ display: "grid", gap: 12 }}>
-              {faqs.map(([q, a]) => (
-                <details key={q} style={{ ...whiteCardStyle, padding: "16px 20px" }}>
-                  <summary style={{ cursor: "pointer", fontWeight: 700, color: GREEN2, fontSize: "clamp(16px, 4vw, 18px)" }}>{q}</summary>
-                  <p style={{ margin: "10px 0 0", color: MUTED, fontSize: "clamp(14px, 3.5vw, 16px)" }}>{a}</p>
-                </details>
-              ))}
-            </div>
-            
-          </div>
-        </section>
-
-        {/* FINAL CTA (Green Background) */}
-        <section id="download" aria-labelledby="cta-title" style={{ background: "linear-gradient(135deg, " + GREEN2 + ", " + GREEN + ")", color: "#fff", padding: "clamp(44px, 8vw, 90px) 0", textAlign: "center" }}>
-          <div className="mq-wrap" style={{ maxWidth: 720, display: "flex", flexDirection: "column", alignItems: "center" }}>
-            <img src={appimage} alt="" width="84" height="84" loading="lazy" style={{ width: 84, height: 84, borderRadius: 26, objectFit: "cover", marginBottom: 22, boxShadow: "0 16px 34px rgba(0,0,0,.35)", border: "3px solid rgba(255,255,255,.15)" }} />
-            <h2 id="cta-title" style={{ ...h2DarkStyle, color: "#fff", marginBottom: 12 }}>Make the Quran part of your every day</h2>
-            <p style={{ margin: "0 0 28px", color: "#cfe0d6", fontSize: "clamp(16px, 4vw, 18px)" }}>Download {APP_NAME} free on Google Play.</p>
-            <PlayBadge place="cta" />
-          </div>
-        </section>
+              <div style={{ padding: phone ? 12 : 16, display: "flex", flexDirection: "column", gap: 6, flex: 1 }}>
+                <h3 style={{ margin: 0, fontSize: phone ? 14.5 : 16, lineHeight: 1.3, color: C.green }}>{p.name}</h3>
+                <p style={{ margin: 0, fontSize: 13, color: C.muted, display: "-webkit-box", WebkitLineClamp: 2, WebkitBoxOrient: "vertical", overflow: "hidden" }}>{p.desc}</p>
+                <div style={{ marginTop: "auto", paddingTop: 8 }}>
+                  <b style={{ display: "block", fontSize: phone ? 16 : 18, marginBottom: 10, color: C.ink }}>{money(p.price)}</b>
+                  {cart[p.id] ? (
+                    <Stepper q={cart[p.id]} onMinus={() => sub(p.id)} onPlus={() => add(p.id)} />
+                  ) : (
+                    <button onClick={() => add(p.id)} style={{ width: "100%", height: 44, borderRadius: 12, border: 0, background: C.green, color: "#fff", fontWeight: 700, fontSize: 15, cursor: "pointer" }}>Add to cart</button>
+                  )}
+                </div>
+              </div>
+            </article>
+          ))}
+        </div>
       </main>
 
       {/* FOOTER */}
-      <footer style={{ background: GREEN, color: "#a9bcb3", textAlign: "center", fontSize: 15, padding: "32px 0 96px", borderTop: "1px solid rgba(255,255,255,.05)" }}>
-        <div className="mq-wrap">
-          <p style={{ margin: "0 0 8px" }}>{APP_NAME} by almarufdevelopers</p>
-          <p style={{ margin: 0, display: "flex", flexWrap: "wrap", justifyContent: "center", gap: 12 }}>
-            <a href="mailto:almarufdevelopers@gmail.com" style={{ color: "#fff", textDecoration: "none", fontWeight: 500 }}>almarufdevelopers@gmail.com</a>
-            <span aria-hidden="true">|</span>
-            <a href="/privacy" style={{ color: "#fff", textDecoration: "none", fontWeight: 500 }}>Privacy policy</a>
-          </p>
-        </div>
+      <footer style={{ background: C.green, color: "#b9cdc3", padding: `28px ${pad}px 36px`, textAlign: "center", fontSize: 14 }}>
+        <div style={{ fontFamily: serif, fontSize: 22, color: "#fff", marginBottom: 6 }}><span style={{ color: C.gold }}>i</span>Mart</div>
+        <p style={{ margin: "0 0 6px" }}>Order on WhatsApp: <a href={`https://wa.me/${WHATSAPP}`} style={{ color: "#fff" }}>+{WHATSAPP}</a></p>
+        <p style={{ margin: 0 }}><a href={`mailto:${EMAIL}`} style={{ color: "#fff" }}>{EMAIL}</a></p>
       </footer>
 
-      {/* STICKY INSTALL BAR (mobile only) */}
-      <div
-        className="mq-bar"
-        aria-hidden={!showBar}
-        style={{
-          alignItems: "center", gap: 12, position: "fixed", left: 12, right: 12,
-          bottom: "calc(12px + env(safe-area-inset-bottom, 0px))", zIndex: 50, background: "rgba(15,50,38,.96)", color: "#fff",
-          padding: "10px 12px", borderRadius: 20, border: "1px solid rgba(255,255,255,.14)", boxShadow: "0 12px 34px rgba(0,0,0,.4)",
-          transform: showBar ? "none" : "translateY(160%)", transition: "transform .3s ease",
-        }}
-      >
-        <img src={appimage} alt="" width="42" height="42" loading="lazy" style={{ width: 42, height: 42, borderRadius: 12, objectFit: "cover", flex: "none" }} />
-        <div style={{ flex: 1, display: "flex", flexDirection: "column", lineHeight: 1.2, minWidth: 0 }}>
-          <b style={{ fontSize: 15 }}>{APP_NAME}</b>
-          <small style={{ color: "#b9cdc3", fontSize: 12.5 }}>Free Quran app · No ads</small>
+      {/* FLOATING CART BAR (phones) */}
+      {phone && count > 0 && !open && (
+        <button onClick={() => setOpen(true)} style={{ position: "fixed", left: 12, right: 12, bottom: "calc(12px + env(safe-area-inset-bottom, 0px))", zIndex: 30, height: 58, borderRadius: 18, border: 0, background: C.gold, color: C.green, fontSize: 16, fontWeight: 800, display: "flex", alignItems: "center", justifyContent: "space-between", padding: "0 20px", boxShadow: "0 12px 30px rgba(0,0,0,.3)", cursor: "pointer" }}>
+          <span>🛒 View cart · {count} {count === 1 ? "item" : "items"}</span>
+          <span>{money(total)}</span>
+        </button>
+      )}
+
+      {/* CART PANEL */}
+      {open && (
+        <div style={{ position: "fixed", inset: 0, zIndex: 40 }}>
+          <div onClick={closeCart} style={{ position: "absolute", inset: 0, background: "rgba(8,20,15,.55)" }} />
+          <aside role="dialog" aria-label="Your cart" style={{ position: "absolute", background: C.card, display: "flex", flexDirection: "column", ...(phone ? { left: 0, right: 0, bottom: 0, maxHeight: "90vh", borderRadius: "22px 22px 0 0" } : { top: 0, right: 0, bottom: 0, width: 420 }) }}>
+            <div style={{ display: "flex", alignItems: "center", padding: "16px 20px", borderBottom: "1px solid " + C.line }}>
+              <h2 style={{ margin: 0, flex: 1, fontFamily: serif, fontSize: 22, color: C.green }}>{step === "cart" ? "Your cart" : "Delivery details"}</h2>
+              <button onClick={closeCart} aria-label="Close cart" style={{ width: 40, height: 40, borderRadius: 12, border: "1px solid " + C.line, background: "#fff", fontSize: 18, cursor: "pointer" }}>✕</button>
+            </div>
+
+            <div style={{ overflowY: "auto", padding: 20, flex: 1 }}>
+              {lines.length === 0 ? (
+                <p style={{ color: C.muted, textAlign: "center", margin: "30px 0" }}>Your cart is empty. Add something from the shop.</p>
+              ) : step === "cart" ? (
+                <div style={{ display: "grid", gap: 14 }}>
+                  {lines.map((l) => (
+                    <div key={l.id} style={{ display: "flex", gap: 12, alignItems: "center" }}>
+                      <div style={{ width: 56, height: 56, borderRadius: 14, overflow: "hidden", flex: "none" }}>
+                        <img src={l.img} alt={l.name} style={{ width: "100%", height: "100%", objectFit: "cover" }} />
+                      </div>
+                      <div style={{ flex: 1, minWidth: 0 }}>
+                        <div style={{ fontWeight: 700, fontSize: 14.5, color: C.green, lineHeight: 1.3 }}>{l.name}</div>
+                        <div style={{ fontSize: 13, color: C.muted }}>{money(l.price)} each</div>
+                      </div>
+                      <div style={{ width: 128, flex: "none" }}><Stepper q={l.qty} onMinus={() => sub(l.id)} onPlus={() => add(l.id)} /></div>
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <div style={{ display: "grid", gap: 12 }}>
+                  <input style={input} placeholder="Full name" autoComplete="name" value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} />
+                  <input style={input} placeholder="Phone number" inputMode="tel" autoComplete="tel" value={form.phone} onChange={(e) => setForm({ ...form, phone: e.target.value })} />
+                  <input style={input} placeholder="Delivery area (town, estate)" value={form.place} onChange={(e) => setForm({ ...form, place: e.target.value })} />
+                  <textarea style={{ ...input, minHeight: 80, resize: "vertical" }} placeholder="Note (optional)" value={form.note} onChange={(e) => setForm({ ...form, note: e.target.value })} />
+                  <p style={{ margin: 0, fontSize: 13, color: C.muted }}>Your order opens in WhatsApp. We reply to confirm the total, delivery and payment.</p>
+                </div>
+              )}
+            </div>
+
+            {lines.length > 0 && (
+              <div style={{ padding: "14px 20px calc(16px + env(safe-area-inset-bottom, 0px))", borderTop: "1px solid " + C.line, background: "#fff" }}>
+                <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 12, fontSize: 17 }}>
+                  <span style={{ color: C.muted }}>Subtotal</span><b>{money(total)}</b>
+                </div>
+                {step === "cart" ? (
+                  <button onClick={() => setStep("details")} style={{ width: "100%", height: 52, borderRadius: 14, border: 0, background: C.green, color: "#fff", fontSize: 16, fontWeight: 700, cursor: "pointer" }}>Continue</button>
+                ) : (
+                  <div style={{ display: "flex", gap: 10 }}>
+                    <button onClick={() => setStep("cart")} style={{ height: 52, padding: "0 18px", borderRadius: 14, border: "1px solid " + C.line, background: "#fff", color: C.green, fontWeight: 700, cursor: "pointer" }}>Back</button>
+                    <button disabled={!ready} onClick={placeOrder} style={{ flex: 1, height: 52, borderRadius: 14, border: 0, background: ready ? "#1f9d55" : "#b9c4bd", color: "#fff", fontSize: 16, fontWeight: 700, cursor: ready ? "pointer" : "not-allowed" }}>Send order on WhatsApp</button>
+                  </div>
+                )}
+              </div>
+            )}
+          </aside>
         </div>
-        <a
-          href={PLAY_URL} target="_blank" rel="noopener noreferrer" tabIndex={showBar ? 0 : -1} onClick={() => track("sticky")}
-          style={{ display: "inline-flex", alignItems: "center", gap: 8, background: GOLD, color: GREEN, fontWeight: 800, fontSize: 16, textDecoration: "none", padding: "12px 18px", borderRadius: 14, minHeight: 44 }}
-        >
-          <PlayLogo size={18} /> Install
-        </a>
-      </div>
+      )}
     </div>
   );
 }
-
-export default Homepage;
